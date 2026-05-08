@@ -1,0 +1,21 @@
+# env files — never commit secrets
+backend/.env
+frontend/.env.local
+frontend/.env*.local
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+.python-version
+
+# Next.js
+frontend/.next/
+frontend/out/
+frontend/node_modules/
+
+# Misc
+.DS_Store
+*.log

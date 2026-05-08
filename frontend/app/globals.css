@@ -1,0 +1,29 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  @apply bg-[#080c14] text-gray-100 antialiased;
+  font-family: -apple-system, BlinkMacSystemFont, "Inter", "SF Pro Display", sans-serif;
+}
+
+::selection {
+  @apply bg-indigo-700/60 text-white;
+}
+
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { @apply bg-white/10 rounded-full; }
+::-webkit-scrollbar-thumb:hover { @apply bg-white/20; }
+
+/* Sparkline canvas */
+.sparkline { display: block; }
+
+/* Glow effects */
+.glow-indigo { box-shadow: 0 0 24px rgba(99, 102, 241, 0.25); }
+.glow-emerald { box-shadow: 0 0 24px rgba(16, 185, 129, 0.2); }
+.glow-amber { box-shadow: 0 0 24px rgba(245, 158, 11, 0.2); }
