@@ -89,6 +89,19 @@ export default function PlayPage() {
         </div>
       )}
 
+      {/* Error */}
+      {state.phase === "error" && (
+        <div className="rounded-2xl border border-red-500/20 bg-red-500/[0.04] p-8 text-center">
+          <p className="text-red-400 font-semibold mb-1">Connection failed</p>
+          <p className="text-gray-500 text-xs mb-5 font-mono">{state.streamText}</p>
+          <button onClick={handleStart}
+            className="px-6 py-2.5 rounded-xl border border-white/[0.08] text-gray-400 hover:text-white text-sm font-semibold transition-all"
+          >
+            Retry
+          </button>
+        </div>
+      )}
+
       {/* Idle */}
       {state.phase === "idle" && (
         <div className="rounded-2xl border border-white/[0.06] bg-[#0d1220] p-12 text-center">

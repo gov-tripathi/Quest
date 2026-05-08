@@ -204,22 +204,29 @@ export function useAGUIStream(options: UseAGUIStreamOptions = {}) {
   const startSession = useCallback(
     async (topicId: string, mode: string = "practice") => {
       setState({ ...INITIAL_STATE, phase: "running", isLoading: true });
-      const token = await getAccessToken();
-      const res = await fetch(`${API_URL}/api/session/start`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ topic_id: topicId, mode }),
-      });
-      // Extract session id from first event after stream parses RUN_STARTED
-      await readSSEStream(res, (ev) => {
-        if (ev.type === "RUN_STARTED") {
-          sessionIdRef.current = ev.runId as string;
-        }
-        processEvent(ev);
-      });
+      try {
+        const token = await getAccessToken();
+        const res = await fetch(`${API_URL}/api/session/start`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ topic_id: topicId, mode }),
+        });
+        if (!res.ok) throw new Error(`Backend error ${res.status}`);
+        await readSSEStream(res, (ev) => {
+          if (ev.type === "RUN_STARTED") sessionIdRef.current = ev.runId as string;
+          processEvent(ev);
+        });
+      } catch (err) {
+        setState((s) => ({
+          ...s,
+          phase: "error",
+          isLoading: false,
+          streamText: err instanceof Error ? err.message : "Could not reach server",
+        }));
+      }
     },
     [processEvent]
   );
@@ -227,27 +234,31 @@ export function useAGUIStream(options: UseAGUIStreamOptions = {}) {
   const submitAnswer = useCallback(
     async (answer: string, timeTakenMs?: number) => {
       if (!sessionIdRef.current) return;
-      setState((s) => ({
-        ...s,
-        phase: "running",
-        isLoading: true,
-        streamText: "",
-        lastResult: null,
-      }));
-      const token = await getAccessToken();
-      const res = await fetch(`${API_URL}/api/session/answer`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          session_id: sessionIdRef.current,
-          answer,
-          time_taken_ms: timeTakenMs,
-        }),
-      });
-      await readSSEStream(res, processEvent);
+      setState((s) => ({ ...s, phase: "running", isLoading: true, streamText: "", lastResult: null }));
+      try {
+        const token = await getAccessToken();
+        const res = await fetch(`${API_URL}/api/session/answer`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            session_id: sessionIdRef.current,
+            answer,
+            time_taken_ms: timeTakenMs,
+          }),
+        });
+        if (!res.ok) throw new Error(`Backend error ${res.status}`);
+        await readSSEStream(res, processEvent);
+      } catch (err) {
+        setState((s) => ({
+          ...s,
+          phase: "error",
+          isLoading: false,
+          streamText: err instanceof Error ? err.message : "Could not reach server",
+        }));
+      }
     },
     [processEvent]
   );
