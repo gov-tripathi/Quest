@@ -23,10 +23,13 @@ export default function GameLayout({ children }: { children: React.ReactNode }) 
   const router    = useRouter();
   const pathname  = usePathname();
   const [collapsed, setCollapsed] = useState(true);
+  const [isGuest,   setIsGuest]   = useState(false);
   const { gameState, loadGameState } = useGameStore();
 
   useEffect(() => {
-    if (getGuestToken()) { loadGameState(); return; }
+    const guest = !!getGuestToken();
+    setIsGuest(guest);
+    if (guest) { loadGameState(); return; }
     const sb = getSupabase();
     sb.auth.getUser().then(({ data }) => {
       if (!data.user) router.replace("/login");
@@ -39,8 +42,6 @@ export default function GameLayout({ children }: { children: React.ReactNode }) 
     await getSupabase().auth.signOut();
     router.replace("/");
   };
-
-  const isGuest = !!getGuestToken();
   const levelInfo = gameState ? getLevelInfo(gameState.xp) : null;
 
   return (
